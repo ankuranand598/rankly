@@ -43,7 +43,7 @@ taskRouter.put("/tasks/:id", async (req, res) => {
     const { title, description, status, duedate } = req.body;
 
     try {
-        const task = await Task.find({ _id: ID });
+        const task = await Task.findOne({ _id: ID });
         if (!task) {
             return res.status(404).json({ error: 'Task not found' });
         }

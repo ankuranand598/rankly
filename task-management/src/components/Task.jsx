@@ -1,35 +1,57 @@
-import React, { useState, useEffect } from 'react';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import  axios  from 'axios';
-const TaskList = () => {
-  const [tasks, setTasks] = useState([]);
+import React, { useState } from 'react';
+import { Button } from 'primereact/button';
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        // const tasksData = await getTasks();
-        // setTasks(tasksData);
-        const response = await axios.get(`http://localhost:8000/api/tasks`);
-        console.log(response)
-        setTasks(response.data);
-      } catch (error) {
-        console.error('Error fetching tasks:', error.message);
-      }
-    };
+const TaskList = ({ tasks, onDeleteTask, onEditTask }) => {
+  const [editMode, setEditMode] = useState(null);
+  const [editedTask, setEditedTask] = useState({});
 
-    fetchTasks();
-  }, []);
+  const handleEdit = (task) => {
+    setEditMode(task._id);
+    setEditedTask(task);
+  };
+
+  const handleSave = () => {
+    onEditTask(editedTask);
+    setEditMode(null);
+  };
+
+  const handleCancel = () => {
+    setEditMode(null);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditedTask({ ...editedTask, [name]: value });
+  };
 
   return (
     <div>
-      <h1>Task List</h1>
-      <DataTable value={tasks}>
-        <Column field="title" header="Title" />
-        <Column field="description" header="Description" />
-        {/* <Column field="status" header="Status" /> */}
-        <Column field="duedate" header="Due Date" />
-      </DataTable>
+      <h2>Task List</h2>
+      <ul>
+        {tasks.map((task) => (
+          <li key={task._id}>
+            <div>{task.title}</div>
+            <div>{task.description}</div>
+            {/* <div>{task.status}</div> */}
+            <div>{task.duedate}</div>
+            {editMode === task._id ? (
+              <>
+                <input type="text" name="title" value={editedTask.title} onChange={handleInputChange} />
+                <input type="text" name="description" value={editedTask.description} onChange={handleInputChange} />
+                {/* <input type="text" name="status" value={editedTask.status} onChange={handleInputChange} /> */}
+                <input type="text" name="duedate" value={editedTask.duedate} onChange={handleInputChange} />
+                <Button label="Save" onClick={handleSave} />
+                <Button label="Cancel" onClick={handleCancel} />
+              </>
+            ) : (
+              <>
+                <Button label="Edit" onClick={() => handleEdit(task)} />
+                <Button label="Delete" onClick={() => onDeleteTask(task._id)} />
+              </>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };
